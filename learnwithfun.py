@@ -17,7 +17,7 @@ def get_claude_response(subject):
     try:
         message = client.messages.create(
             model="claude-3-sonnet-20240229",
-            max_tokens=1000,
+            max_tokens=100000,
             temperature=0,
             messages=[
                 {
@@ -28,7 +28,8 @@ def get_claude_response(subject):
         )
         return message.content
     except Exception as e:
-        return str(e)
+        st.error(f"An error occurred while calling the Claude API: {str(e)}")
+        return None
 
 # Generate and display dashboard when user clicks the button
 if st.button("Generate Dashboard"):
@@ -36,8 +37,20 @@ if st.button("Generate Dashboard"):
         with st.spinner("Generating your dashboard..."):
             html_content = get_claude_response(subject)
             
-        # Display the generated HTML
-        st.components.v1.html(html_content, height=600, scrolling=True)
+        if html_content:
+            # Ensure the content is a string and starts with <html>
+            if isinstance(html_content, str) and html_content.strip().lower().startswith("<html"):
+                # Display the generated HTML
+                try:
+                    st.components.v1.html(html_content, height=600, scrolling=True)
+                except Exception as e:
+                    st.error(f"Error displaying HTML content: {str(e)}")
+                    st.text_area("Raw HTML Content:", value=html_content, height=300)
+            else:
+                st.error("The generated content is not valid HTML. Here's the raw content:")
+                st.text_area("Raw Content:", value=html_content, height=300)
+        else:
+            st.error("Failed to generate dashboard content. Please try again.")
     else:
         st.warning("Please enter a subject to study.")
 
