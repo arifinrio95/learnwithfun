@@ -1,18 +1,25 @@
 import streamlit as st
 import anthropic
 import base64
+import PyPDF2
+import io
 
 # Set up the page
-st.set_page_config(page_title="Interactive Study Dashboard", layout="wide")
+st.set_page_config(page_title="Interactive Paper Summary Dashboard", layout="wide")
 
 # Streamlit app
-st.title("Interactive Study Dashboard Generator")
+st.title("Interactive Paper Summary Dashboard Generator")
 
-# User input
-subject = st.text_area("Masukkan topik yang ingin Anda pelajari:")
+# Function to extract text from PDF
+def extract_text_from_pdf(pdf_file):
+    pdf_reader = PyPDF2.PdfReader(pdf_file)
+    text = ""
+    for page in pdf_reader.pages:
+        text += page.extract_text()
+    return text
 
 # Function to get response from Claude API
-def get_claude_response(subject):
+def get_claude_response(paper_content):
     client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
     
     try:
@@ -23,7 +30,7 @@ def get_claude_response(subject):
             messages=[
                 {
                     "role": "user",
-                    "content": f"create an interactive and super detailed dashboard to present and study {subject} so that I can understand well, make it really good and professional. with aesthetic design and icons. the material should be explain with creative and out of the box. create in html. make sure there is no error. berbahasa Indonesia. respond only with html script, no other explanation, just html script directly."
+                    "content": f"create an interactive and super detailed dashboard to present and study this paper so that i can really understand the method and the results, make it really good and professional. with aesthetic design and icons. create in html. make sure there is no error. berbahasa Indonesia. paper contents: {paper_content}"
                 }
             ]
         )
@@ -44,11 +51,18 @@ def get_html_download_link(html_string, filename="dashboard.html"):
     href = f'<a href="data:text/html;base64,{b64}" download="{filename}">Download HTML</a>'
     return href
 
+# File uploader for PDF
+uploaded_file = st.file_uploader("Unggah file PDF paper Anda", type="pdf")
+
 # Generate and display dashboard when user clicks the button
 if st.button("Buat Dashboard"):
-    if subject:
-        with st.spinner("Sedang membuat dashboard Anda..."):
-            raw_content = get_claude_response(subject)
+    if uploaded_file is not None:
+        with st.spinner("Sedang memproses PDF dan membuat dashboard Anda..."):
+            # Extract text from PDF
+            pdf_content = extract_text_from_pdf(uploaded_file)
+            
+            # Get response from Claude
+            raw_content = get_claude_response(pdf_content)
             
         if raw_content:
             html_content = extract_html_from_textblocks(raw_content)
@@ -79,17 +93,17 @@ if st.button("Buat Dashboard"):
         else:
             st.error("Gagal menghasilkan konten dashboard. Silakan coba lagi.")
     else:
-        st.warning("Silakan masukkan topik yang ingin dipelajari.")
+        st.warning("Silakan unggah file PDF paper yang ingin dirangkum.")
 
 # Instructions for use
 st.markdown("""
 ## Cara Penggunaan:
-1. Masukkan topik yang ingin Anda pelajari di area teks di atas.
+1. Unggah file PDF paper yang ingin Anda rangkum menggunakan tombol unggah di atas.
 2. Klik tombol "Buat Dashboard".
-3. Tunggu beberapa saat sementara dashboard interaktif dibuat.
+3. Tunggu beberapa saat sementara PDF diproses dan dashboard interaktif dibuat.
 4. Jelajahi dashboard yang dihasilkan di dalam iframe. Jika kontennya panjang, Anda dapat menggulir ke bawah di dalam iframe.
 5. Gunakan link "Download HTML" untuk menyimpan dashboard sebagai file HTML.
 6. Jika Anda menemui masalah, periksa HTML mentah di bagian expander untuk debugging.
 
-Catatan: Pembuatan mungkin memerlukan beberapa saat tergantung pada kompleksitas topik.
+Catatan: Pembuatan mungkin memerlukan beberapa saat tergantung pada kompleksitas dan panjang paper.
 """)
