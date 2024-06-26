@@ -34,16 +34,24 @@ def get_claude_response(subject):
 
 # Function to extract and complete partial HTML
 def extract_and_complete_html(content):
-    # Extract HTML content
-    html_match = re.search(r'<!DOCTYPE html>[\s\S]*', content)
-    if html_match:
-        html_content = html_match.group(0)
-        
-        # Check if the HTML is complete
-        if '</html>' not in html_content:
-            html_content += "\n</body>\n</html>"
-        
-        return html_content
+    if not isinstance(content, str):
+        st.error(f"Expected string content, but got {type(content)}")
+        return None
+    
+    try:
+        # Extract HTML content
+        html_match = re.search(r'<!DOCTYPE html>[\s\S]*', content)
+        if html_match:
+            html_content = html_match.group(0)
+            
+            # Check if the HTML is complete
+            if '</html>' not in html_content:
+                html_content += "\n</body>\n</html>"
+            
+            return html_content
+    except Exception as e:
+        st.error(f"Error in extracting HTML: {str(e)}")
+    
     return None
 
 # Generate and display dashboard when user clicks the button
@@ -53,6 +61,9 @@ if st.button("Generate Dashboard"):
             raw_content = get_claude_response(subject)
             
         if raw_content:
+            st.text("Raw content type: " + str(type(raw_content)))
+            st.text("Raw content preview: " + str(raw_content)[:100])  # Display first 100 characters
+            
             html_content = extract_and_complete_html(raw_content)
             if html_content:
                 try:
@@ -62,7 +73,7 @@ if st.button("Generate Dashboard"):
                     st.text_area("Raw HTML Content:", value=html_content, height=300)
             else:
                 st.error("Could not extract valid HTML content. Here's the raw content:")
-                st.text_area("Raw Content:", value=raw_content, height=300)
+                st.text_area("Raw Content:", value=str(raw_content), height=300)
         else:
             st.error("Failed to generate dashboard content. Please try again.")
     else:
