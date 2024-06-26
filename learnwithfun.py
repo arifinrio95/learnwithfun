@@ -23,16 +23,7 @@ def get_claude_response(subject):
             messages=[
                 {
                     "role": "user",
-                    "content": f"""create an interactive and super detailed dashboard to present and study {subject} so that I can understand well, make it really good and professional. with aesthetic design and icons. the material should be explain with creative and out of the box. create in html. make sure there is no error. berbahasa Indonesia. 
-                    
-                    Important: 
-                    1. Do not include any JavaScript that could cause page reloads or form submissions.
-                    2. Use inline CSS for styling to ensure compatibility.
-                    3. For any interactive elements, use data attributes instead of onclick events.
-                    4. Do not include <html>, <head>, or <body> tags.
-                    5. Ensure all content is within a single <div> with id="dashboard-content".
-                    
-                    respond only with html script, no other explanation, just html script directly."""
+                    "content": f"create an interactive and super detailed dashboard to present and study {subject} so that I can understand well, make it really good and professional. with aesthetic design and icons. the material should be explain with creative and out of the box. create in html. make sure there is no error. berbahasa Indonesia. respond only with html script, no other explanation, just html script directly."
                 }
             ]
         )
@@ -62,9 +53,13 @@ if st.button("Buat Dashboard"):
         if raw_content:
             html_content = extract_html_from_textblocks(raw_content)
             if html_content:
-                # Wrap the content in an iframe to prevent unwanted interactions
+                # Wrap the content in an iframe with sandbox attribute
                 iframe_content = f"""
-                <iframe srcdoc='{html_content}' width="100%" height="600px" style="border: none;">
+                <iframe srcdoc='{html_content}' 
+                        width="100%" 
+                        height="600px" 
+                        style="border: none;"
+                        sandbox="allow-scripts allow-same-origin">
                 </iframe>
                 """
                 st.components.v1.html(iframe_content, height=620, scrolling=True)
