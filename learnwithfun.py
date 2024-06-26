@@ -9,7 +9,7 @@ st.set_page_config(page_title="Interactive Study Dashboard", layout="wide")
 st.title("Interactive Study Dashboard Generator")
 
 # User input
-subject = st.text_area("Enter the subject you want to study:")
+subject = st.text_area("Enter the subject you want to study (put up to 3 words):")
 
 # Function to get response from Claude API
 def get_claude_response(subject):
