@@ -1,6 +1,5 @@
 import streamlit as st
 import anthropic
-import re
 
 # Set up the page
 st.set_page_config(page_title="Interactive Study Dashboard", layout="wide")
@@ -9,7 +8,7 @@ st.set_page_config(page_title="Interactive Study Dashboard", layout="wide")
 st.title("Interactive Study Dashboard Generator")
 
 # User input
-subject = st.text_area("Enter the subject you want to study:")
+subject = st.text_area("Masukkan topik yang ingin Anda pelajari:")
 
 # Function to get response from Claude API
 def get_claude_response(subject):
@@ -29,7 +28,7 @@ def get_claude_response(subject):
         )
         return message.content
     except Exception as e:
-        st.error(f"An error occurred while calling the Claude API: {str(e)}")
+        st.error(f"Terjadi kesalahan saat memanggil API Claude: {str(e)}")
         return None
 
 # Function to extract HTML from TextBlock objects
@@ -43,50 +42,39 @@ def extract_html_from_textblocks(content):
     return None
 
 # Generate and display dashboard when user clicks the button
-if st.button("Generate Dashboard"):
+if st.button("Buat Dashboard"):
     if subject:
-        with st.spinner("Generating your dashboard..."):
+        with st.spinner("Sedang membuat dashboard Anda..."):
             raw_content = get_claude_response(subject)
             
         if raw_content:
-            st.text("Raw content type: " + str(type(raw_content)))
-            st.text("Raw content preview: " + str(raw_content)[:100])  # Display first 100 characters
-            
             html_content = extract_html_from_textblocks(raw_content)
             if html_content:
-                # Display options
-                display_option = st.radio("Choose display method:", 
-                                          ["HTML Component", "Markdown", "Raw HTML"])
+                # Display HTML content with scrolling
+                st.components.v1.html(html_content, height=600, scrolling=True)
                 
-                if display_option == "HTML Component":
-                    try:
-                        st.components.v1.html(html_content, height=800, scrolling=True)
-                    except Exception as e:
-                        st.error(f"Error displaying HTML content: {str(e)}")
-                elif display_option == "Markdown":
-                    st.markdown(html_content, unsafe_allow_html=True)
-                else:  # Raw HTML
-                    st.text_area("Raw HTML Content:", value=html_content, height=400)
+                # Add a note about scrolling
+                st.info("Jika konten lebih panjang, Anda dapat menggulir ke bawah di dalam dashboard.")
                 
-                # Always show raw HTML for debugging
-                with st.expander("View Raw HTML"):
-                    st.text_area("Raw HTML for Debugging:", value=html_content, height=300)
+                # Always show raw HTML for debugging in an expander
+                with st.expander("Lihat HTML Mentah (untuk debugging)"):
+                    st.text_area("Raw HTML:", value=html_content, height=300)
             else:
-                st.error("Could not extract valid HTML content. Here's the raw content:")
-                st.text_area("Raw Content:", value=str(raw_content), height=300)
+                st.error("Tidak dapat mengekstrak konten HTML yang valid. Berikut adalah konten mentahnya:")
+                st.text_area("Konten Mentah:", value=str(raw_content), height=300)
         else:
-            st.error("Failed to generate dashboard content. Please try again.")
+            st.error("Gagal menghasilkan konten dashboard. Silakan coba lagi.")
     else:
-        st.warning("Please enter a subject to study.")
+        st.warning("Silakan masukkan topik yang ingin dipelajari.")
 
 # Instructions for use
 st.markdown("""
-## How to use:
-1. Enter the subject you want to study in the text area above.
-2. Click the "Generate Dashboard" button.
-3. Choose how you want to display the content (HTML Component, Markdown, or Raw HTML).
-4. Explore the generated dashboard.
-5. If you encounter issues, check the raw HTML in the expander for debugging.
+## Cara Penggunaan:
+1. Masukkan topik yang ingin Anda pelajari di area teks di atas.
+2. Klik tombol "Buat Dashboard".
+3. Tunggu beberapa saat sementara dashboard interaktif dibuat.
+4. Jelajahi dashboard yang dihasilkan. Jika kontennya panjang, Anda dapat menggulir ke bawah di dalam dashboard.
+5. Jika Anda menemui masalah, periksa HTML mentah di bagian expander untuk debugging.
 
-Note: Generation may take a few moments depending on the complexity of the subject.
+Catatan: Pembuatan mungkin memerlukan beberapa saat tergantung pada kompleksitas topik.
 """)
