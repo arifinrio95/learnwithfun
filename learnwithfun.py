@@ -32,26 +32,14 @@ def get_claude_response(subject):
         st.error(f"An error occurred while calling the Claude API: {str(e)}")
         return None
 
-# Function to extract and complete partial HTML
-def extract_and_complete_html(content):
-    if not isinstance(content, str):
-        st.error(f"Expected string content, but got {type(content)}")
-        return None
-    
-    try:
-        # Extract HTML content
-        html_match = re.search(r'<!DOCTYPE html>[\s\S]*', content)
-        if html_match:
-            html_content = html_match.group(0)
-            
-            # Check if the HTML is complete
-            if '</html>' not in html_content:
-                html_content += "\n</body>\n</html>"
-            
-            return html_content
-    except Exception as e:
-        st.error(f"Error in extracting HTML: {str(e)}")
-    
+# Function to extract HTML from TextBlock objects
+def extract_html_from_textblocks(content):
+    if isinstance(content, list) and len(content) > 0 and hasattr(content[0], 'text'):
+        html_content = content[0].text
+        # Check if the HTML is complete
+        if '</html>' not in html_content:
+            html_content += "\n</body>\n</html>"
+        return html_content
     return None
 
 # Generate and display dashboard when user clicks the button
@@ -64,7 +52,7 @@ if st.button("Generate Dashboard"):
             st.text("Raw content type: " + str(type(raw_content)))
             st.text("Raw content preview: " + str(raw_content)[:100])  # Display first 100 characters
             
-            html_content = extract_and_complete_html(raw_content)
+            html_content = extract_html_from_textblocks(raw_content)
             if html_content:
                 try:
                     st.components.v1.html(html_content, height=600, scrolling=True)
