@@ -1,5 +1,6 @@
 import streamlit as st
 import anthropic
+import re
 
 # Set up the page
 st.set_page_config(page_title="Interactive Study Dashboard", layout="wide")
@@ -31,24 +32,37 @@ def get_claude_response(subject):
         st.error(f"An error occurred while calling the Claude API: {str(e)}")
         return None
 
+# Function to extract and complete partial HTML
+def extract_and_complete_html(content):
+    # Extract HTML content
+    html_match = re.search(r'<!DOCTYPE html>[\s\S]*', content)
+    if html_match:
+        html_content = html_match.group(0)
+        
+        # Check if the HTML is complete
+        if '</html>' not in html_content:
+            html_content += "\n</body>\n</html>"
+        
+        return html_content
+    return None
+
 # Generate and display dashboard when user clicks the button
 if st.button("Generate Dashboard"):
     if subject:
         with st.spinner("Generating your dashboard..."):
-            html_content = get_claude_response(subject)
+            raw_content = get_claude_response(subject)
             
-        if html_content:
-            # Ensure the content is a string and starts with <html>
-            if isinstance(html_content, str) and html_content.strip().lower().startswith("<html"):
-                # Display the generated HTML
+        if raw_content:
+            html_content = extract_and_complete_html(raw_content)
+            if html_content:
                 try:
                     st.components.v1.html(html_content, height=600, scrolling=True)
                 except Exception as e:
                     st.error(f"Error displaying HTML content: {str(e)}")
                     st.text_area("Raw HTML Content:", value=html_content, height=300)
             else:
-                st.error("The generated content is not valid HTML. Here's the raw content:")
-                st.text_area("Raw Content:", value=html_content, height=300)
+                st.error("Could not extract valid HTML content. Here's the raw content:")
+                st.text_area("Raw Content:", value=raw_content, height=300)
         else:
             st.error("Failed to generate dashboard content. Please try again.")
     else:
