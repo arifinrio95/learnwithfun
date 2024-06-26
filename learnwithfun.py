@@ -1,5 +1,4 @@
 import streamlit as st
-import requests
 import anthropic
 
 # Set up the page
@@ -9,21 +8,25 @@ st.set_page_config(page_title="Interactive Study Dashboard", layout="wide")
 st.title("Interactive Study Dashboard Generator")
 
 # User input
-subject = st.text_area("Enter the subject you want to study (put up to 3 words):")
+subject = st.text_area("Enter the subject you want to study:")
 
 # Function to get response from Claude API
 def get_claude_response(subject):
     client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
     
-    prompt = f"create an interactive and super detailed dashboard to present and study {subject} so that I can understand well, make it really good and professional. with aesthetic design and icons. the material should be explain with creative and out of the box. create in html. make sure there is no error. berbahasa Indonesia. respond only with html script, no other explanation, just html script directly."
-    
     try:
-        response = client.completions.create(
+        message = client.messages.create(
             model="claude-3-sonnet-20240229",
-            prompt=prompt,
-            max_tokens_to_sample=100000,
+            max_tokens=100000,
+            temperature=0,
+            messages=[
+                {
+                    "role": "user",
+                    "content": f"create an interactive and super detailed dashboard to present and study {subject} so that I can understand well, make it really good and professional. with aesthetic design and icons. the material should be explain with creative and out of the box. create in html. make sure there is no error. berbahasa Indonesia. respond only with html script, no other explanation, just html script directly."
+                }
+            ]
         )
-        return response.completion
+        return message.content
     except Exception as e:
         return str(e)
 
