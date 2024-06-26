@@ -18,7 +18,7 @@ def get_claude_response(subject):
     try:
         message = client.messages.create(
             model="claude-3-sonnet-20240229",
-            max_tokens=1000,
+            max_tokens=3000,
             temperature=0,
             messages=[
                 {
@@ -54,11 +54,23 @@ if st.button("Generate Dashboard"):
             
             html_content = extract_html_from_textblocks(raw_content)
             if html_content:
-                try:
-                    st.components.v1.html(html_content, height=600, scrolling=True)
-                except Exception as e:
-                    st.error(f"Error displaying HTML content: {str(e)}")
-                    st.text_area("Raw HTML Content:", value=html_content, height=300)
+                # Display options
+                display_option = st.radio("Choose display method:", 
+                                          ["HTML Component", "Markdown", "Raw HTML"])
+                
+                if display_option == "HTML Component":
+                    try:
+                        st.components.v1.html(html_content, height=800, scrolling=True)
+                    except Exception as e:
+                        st.error(f"Error displaying HTML content: {str(e)}")
+                elif display_option == "Markdown":
+                    st.markdown(html_content, unsafe_allow_html=True)
+                else:  # Raw HTML
+                    st.text_area("Raw HTML Content:", value=html_content, height=400)
+                
+                # Always show raw HTML for debugging
+                with st.expander("View Raw HTML"):
+                    st.text_area("Raw HTML for Debugging:", value=html_content, height=300)
             else:
                 st.error("Could not extract valid HTML content. Here's the raw content:")
                 st.text_area("Raw Content:", value=str(raw_content), height=300)
@@ -72,8 +84,9 @@ st.markdown("""
 ## How to use:
 1. Enter the subject you want to study in the text area above.
 2. Click the "Generate Dashboard" button.
-3. Wait for the interactive dashboard to be generated and displayed.
-4. Scroll through the dashboard to explore the content.
+3. Choose how you want to display the content (HTML Component, Markdown, or Raw HTML).
+4. Explore the generated dashboard.
+5. If you encounter issues, check the raw HTML in the expander for debugging.
 
 Note: Generation may take a few moments depending on the complexity of the subject.
 """)
