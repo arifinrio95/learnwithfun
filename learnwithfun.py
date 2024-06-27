@@ -90,6 +90,10 @@ if st.button("Buat Dashboard"):
             # Combine all parts
             full_html = f"{part1}\n{part2}\n{part3}"
 
+            # Remove any comments or labels from the HTML
+            full_html = re.sub(r'<!--.*?-->', '', full_html, flags=re.DOTALL)
+            full_html = re.sub(r'<!-- Bagian \d -->', '', full_html)
+
             # Display the combined dashboard
             iframe_content = f"""
             <iframe srcdoc='{full_html}' 
