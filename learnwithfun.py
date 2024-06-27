@@ -59,11 +59,15 @@ def extract_html(content):
         html = html_content.group(0)
         # Remove comments
         html = re.sub(r'<!--.*?-->', '', html, flags=re.DOTALL)
-        # Remove excessive newlines and spaces
+        # Remove all newlines
+        html = html.replace('\n', ' ')
+        # Remove excessive spaces
         html = re.sub(r'\s+', ' ', html)
         # Add newlines for readability in specific tags
         html = re.sub(r'(</(html|head|body|div|section|script)>)', r'\1\n', html)
         html = re.sub(r'(<(html|head|body|div|section|script).*?>)', r'\n\1', html)
+        # Remove any remaining backslashes
+        html = html.replace('\\', '')
         return html.strip()
     return content  # Return original content if no HTML tags found
 
@@ -99,6 +103,7 @@ if st.button("Buat Dashboard"):
             full_html = f"{part1}{part2}{part3}"
             full_html = re.sub(r'</html>.*?<html.*?>', '', full_html)
             full_html = re.sub(r'</body>.*?<body.*?>', '', full_html)
+            full_html = extract_html(full_html)  # Clean the combined HTML
 
             # Display the combined dashboard
             iframe_content = f"""
