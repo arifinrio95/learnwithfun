@@ -51,12 +51,17 @@ sekarang tulis dulu bagian {part}."""
         st.error(f"Terjadi kesalahan saat memanggil API Claude: {str(e)}")
         return None
 
-# Function to extract only HTML content
+# Function to extract only HTML content and clean it
 def extract_html(content):
     # Remove any text before the first < and after the last >
     html_content = re.search(r'<[\s\S]*>', content)
     if html_content:
-        return html_content.group(0)
+        html = html_content.group(0)
+        # Remove newline characters and extra spaces
+        html = re.sub(r'\s+', ' ', html)
+        # Add newlines for readability in specific tags
+        html = re.sub(r'(</(html|head|body|div|section|script)>)', r'\1\n', html)
+        return html
     return content  # Return original content if no HTML tags found
 
 # Function to create a download link for HTML content
@@ -87,12 +92,10 @@ if st.button("Buat Dashboard"):
                 st.error("Gagal menghasilkan bagian ketiga. Silakan coba lagi.")
                 st.stop()
 
-            # Combine all parts
-            full_html = f"{part1}\n{part2}\n{part3}"
-
-            # Remove any comments or labels from the HTML
-            full_html = re.sub(r'<!--.*?-->', '', full_html, flags=re.DOTALL)
-            full_html = re.sub(r'<!-- Bagian \d -->', '', full_html)
+            # Combine all parts and clean the HTML
+            full_html = f"{part1}{part2}{part3}"
+            full_html = re.sub(r'</html>.*?<html.*?>', '', full_html)
+            full_html = re.sub(r'</body>.*?<body.*?>', '', full_html)
 
             # Display the combined dashboard
             iframe_content = f"""
