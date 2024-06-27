@@ -57,11 +57,14 @@ def extract_html(content):
     html_content = re.search(r'<[\s\S]*>', content)
     if html_content:
         html = html_content.group(0)
-        # Remove newline characters and extra spaces
+        # Remove comments
+        html = re.sub(r'<!--.*?-->', '', html, flags=re.DOTALL)
+        # Remove excessive newlines and spaces
         html = re.sub(r'\s+', ' ', html)
         # Add newlines for readability in specific tags
         html = re.sub(r'(</(html|head|body|div|section|script)>)', r'\1\n', html)
-        return html
+        html = re.sub(r'(<(html|head|body|div|section|script).*?>)', r'\n\1', html)
+        return html.strip()
     return content  # Return original content if no HTML tags found
 
 # Function to create a download link for HTML content
