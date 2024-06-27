@@ -63,8 +63,11 @@ def extract_html(content):
         html = re.sub(r'\s+', ' ', html)
         # Remove any remaining backslashes
         html = html.replace('\\', '')
-        # Remove "n " artifacts
-        html = html.replace('n ', '')
+        # Remove "n" characters that are not part of HTML tags or attributes
+        html = re.sub(r'(?<=[^a-zA-Z])n(?=[^a-zA-Z])', '', html)
+        # Fix any broken tags or attributes caused by the cleaning process
+        html = html.replace('< ', '<').replace(' >', '>')
+        html = re.sub(r'([a-zA-Z])=([a-zA-Z])', r'\1="\2"', html)
         return html.strip()
     return content  # Return original content if no HTML tags found
 
