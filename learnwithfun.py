@@ -23,7 +23,7 @@ def get_claude_response(subject):
             messages=[
                 {
                     "role": "user",
-                    "content": f"create an interactive and super detailed dashboard to present and study {subject} so that I can understand well, make it really good and professional. with aesthetic design and icons. the material should be explain with creative and out of the box with a lot of experimentation. create in html. make sure there is no error. berbahasa Indonesia. respond only with html script, no other explanation, just html script directly. buat script sepanjang-panjangnya sampai mencapai limit token. buat design nya estetic dan berwarna."
+                    "content": f"create an interactive and simple dashboard to present and study {subject} so that I can understand well, make it really aesthetic and elegant. with aesthetic design and icons. the material should be explain with creative most related simulation. create in html. make sure there is no error. berbahasa Indonesia. respond only with html script, no other explanation, just html script directly. buat design-nya estetic dan berwarna."
                 }
             ]
         )
