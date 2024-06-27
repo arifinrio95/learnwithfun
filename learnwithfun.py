@@ -21,7 +21,13 @@ def get_claude_response(subject, part, context=""):
 generate dalam 3 bagian script, setiap bagian tidak bisa langsung dirunning, tapi jika nanti langsung digabung tidak error.
 sekarang tulis dulu bagian {part}."""
 
-    full_prompt = base_prompt + ("\n\n" + context if context else "")
+    if context:
+        if part == 2:
+            full_prompt = base_prompt + f"\n\nBerikut adalah bagian pertama yang sudah dibuat:\n\n{context}"
+        elif part == 3:
+            full_prompt = base_prompt + f"\n\nBerikut adalah bagian pertama dan kedua yang sudah dibuat:\n\n{context}"
+    else:
+        full_prompt = base_prompt
 
     try:
         message = client.messages.create(
