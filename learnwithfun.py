@@ -42,7 +42,10 @@ sekarang tulis dulu bagian {part}."""
             ]
         )
         # Extract only the HTML content
-        html_content = extract_html(message.content)
+        content = message.content
+        if isinstance(content, list):
+            content = ' '.join(str(item) for item in content)
+        html_content = extract_html(content)
         return html_content
     except Exception as e:
         st.error(f"Terjadi kesalahan saat memanggil API Claude: {str(e)}")
