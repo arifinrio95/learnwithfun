@@ -59,15 +59,12 @@ def extract_html(content):
         html = html_content.group(0)
         # Remove comments
         html = re.sub(r'<!--.*?-->', '', html, flags=re.DOTALL)
-        # Remove all newlines
-        html = html.replace('\n', ' ')
-        # Remove excessive spaces
+        # Remove all newlines and extra spaces
         html = re.sub(r'\s+', ' ', html)
-        # Add newlines for readability in specific tags
-        html = re.sub(r'(</(html|head|body|div|section|script)>)', r'\1\n', html)
-        html = re.sub(r'(<(html|head|body|div|section|script).*?>)', r'\n\1', html)
         # Remove any remaining backslashes
         html = html.replace('\\', '')
+        # Remove "n " artifacts
+        html = html.replace('n ', '')
         return html.strip()
     return content  # Return original content if no HTML tags found
 
