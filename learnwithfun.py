@@ -18,7 +18,7 @@ def get_claude_response(subject):
     try:
         message = client.messages.create(
             model="claude-3-sonnet-20240229",
-            max_tokens=3000,
+            max_tokens=4000,
             temperature=0,
             messages=[
                 {
